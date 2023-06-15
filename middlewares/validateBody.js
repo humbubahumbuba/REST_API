@@ -2,7 +2,7 @@ const { HttpError } = require('../helpers');
 
 const validateBody = (schema) => {
   const func = (req, res, next) => {
-    if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
+    if (req.body === Object && Object.keys(req.body).length === 0) {
       throw HttpError(400);
     }
 
