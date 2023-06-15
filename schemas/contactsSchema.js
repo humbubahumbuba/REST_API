@@ -23,8 +23,20 @@ const addSchema = Joi.object()
         'any.required': `missing required 'email' field`,
         'string.empty': `'email' cannot be an empty field`,
       }),
+    favorite: {
+      type: Boolean,
+      default: false,
+    },
   });
+
+const updateFavouriteSchema = Joi.object({
+  favorite: Joi.boolean().required().messages({
+    'any.required': `missing required "favorite" field`,
+    'string.empty': `"favorite" cannot be an empty field`,
+  }),
+});
 
 module.exports = {
   addSchema,
+  updateFavouriteSchema,
 };
