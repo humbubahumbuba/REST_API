@@ -26,3 +26,32 @@ const userSchema = new Schema(
 );
 
 userSchema.post('save', handleMongooseError);
+
+const registerSchema = Joi.object({
+  password: Joi.string().min(6).required(),
+  email: Joi.string()
+    .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+    .required(),
+  subscription: Joi.string(),
+});
+
+const loginSchema = Joi.object({
+  password: Joi.string().min(6).required(),
+  email: Joi.string()
+    .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+    .required(),
+});
+const subscriptionSchema = Joi.object({
+  subscription: Joi.string().valid('starter', 'pro', 'business').required(),
+});
+const schemas = {
+  registerSchema,
+  loginSchema,
+  subscriptionSchema,
+};
+const User = model('user', userSchema);
+
+module.exports = {
+  User,
+  schemas,
+};
