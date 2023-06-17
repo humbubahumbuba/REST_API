@@ -12,5 +12,5 @@ router.post(
   validateBody(schemas.registerSchema),
   usersController.register
 );
-
+router.post('/login', validateBody(schemas.loginSchema), usersController.login);
 module.exports = router;
