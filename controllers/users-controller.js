@@ -60,32 +60,24 @@ const getCurrentUser = async (req, res) => {
 };
 
 const logOut = async (req, res, next) => {
-  try {
-    const { _id } = req.user;
-    await User.findByIdAndUpdate(_id, { token: '' });
-    res.status(204).json({
-      message: 'No Content',
-    });
-  } catch (error) {
-    next(error);
-  }
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: '' });
+  res.status(204).json({
+    message: 'Log Out succesfully',
+  });
 };
 
 const updateSubscription = async (req, res, next) => {
-  try {
-    const { _id } = req.user;
-    const newStatus = await User.findByIdAndUpdate(
-      _id,
-      { subscription: req.body.subscription },
-      { new: true }
-    );
-    if (!newStatus) {
-      throw HttpError(404, 'Not found');
-    }
-    res.json(newStatus);
-  } catch (error) {
-    next(error);
+  const { _id } = req.user;
+  const newStatus = await User.findByIdAndUpdate(
+    _id,
+    { subscription: req.body.subscription },
+    { new: true }
+  );
+  if (!newStatus) {
+    throw HttpError(404, 'Not found');
   }
+  res.json(newStatus);
 };
 
 module.exports = {
