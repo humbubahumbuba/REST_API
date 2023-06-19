@@ -4,7 +4,14 @@ const { HttpError } = require('../helpers');
 const { ctrlWrapper } = require('../decorators');
 
 const getAllContacts = async (req, res) => {
-  const result = await Contact.find({}, '-createdAt -updatedAt');
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 10, favorite = 'true' } = req.query;
+  const skip = (page - 1) * limit;
+  const result = await Contact.find(
+    { owner, favorite },
+    '-createdAt -updatedAt',
+    { skip, limit }
+  ).populate('owner, email subscription');
   res.json(result);
 };
 
@@ -18,7 +25,8 @@ const getContatctById = async (req, res) => {
 };
 
 const addContact = async (req, res) => {
-  const result = await Contact.create(req.body);
+  const { _id: owner } = req.user;
+  const result = await Contact.create({ ...req.body, owner });
   res.status(201).json(result);
 };
 
@@ -53,10 +61,6 @@ const updateStatusContact = async (req, res, next) => {
     const result = await Contact.findByIdAndUpdate(contactId, req.body, {
       new: true,
     });
-
-    // if (!result) {
-    //   throw HttpError(400, 'missing field favorite');
-    // }
 
     res.json(result);
   } catch (err) {
