@@ -7,10 +7,13 @@ const usersController = require('../../controllers/users-controller');
 
 const router = express.Router();
 
+// route.use(authenticate);
+
 router.post(
   '/register',
   validateBody(schemas.registerSchema),
   usersController.register
 );
 router.post('/login', validateBody(schemas.loginSchema), usersController.login);
+
 module.exports = router;
