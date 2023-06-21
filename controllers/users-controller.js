@@ -2,6 +2,12 @@ const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
 
+const gravatar = require('gravatar');
+
+const path = require('path');
+
+const Jimp = require('jimp');
+
 const { User } = require('../models/user');
 
 const { HttpError } = require('../helpers');
@@ -10,6 +16,10 @@ const { ctrlWrapper } = require('../decorators');
 
 const { SECRET_KEY } = process.env;
 
+const fs = require('fs/promises');
+
+const avatarsDir = path.resolve('public', 'avatars');
+
 const register = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -17,10 +27,16 @@ const register = async (req, res) => {
     throw HttpError(409, 'Email already in use');
   }
   const hashPassword = await bcrypt.hash(password, 10);
-  const newUser = await User.create({ ...req.body, password: hashPassword });
+  const avatarUrl = gravatar.url(email);
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarUrl,
+  });
   res.status(201).json({
     email: newUser.email,
     password: newUser.password,
+    avatarUrl,
   });
 };
 
@@ -80,10 +96,30 @@ const updateSubscription = async (req, res, next) => {
   res.json(newStatus);
 };
 
+const updateAvatar = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    const { path: tempUpload, originalname } = req.file;
+    const photoUser = await Jimp.read(tempUpload);
+    await photoUser.cover(250, 250).writeAsync(tempUpload);
+    const filename = `${_id}_${originalname}`;
+    const resultUpload = path.join(avatarsDir, filename);
+    await fs.rename(tempUpload, resultUpload);
+    const avatarURL = path.join('avatars', filename);
+    await User.findByIdAndUpdate(_id, { avatarURL });
+    res.json({
+      avatarURL,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   getCurrentUser: ctrlWrapper(getCurrentUser),
   logOut: ctrlWrapper(logOut),
   updateSubscription: ctrlWrapper(updateSubscription),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };

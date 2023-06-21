@@ -6,9 +6,7 @@ const router = express.Router();
 
 const schemas = require('../../schemas/contactsSchema');
 
-const { validateBody, authenticate } = require('../../middlewares');
-
-const { isValidId } = require('../../middlewares');
+const { validateBody, authenticate, isValidId } = require('../../middlewares');
 
 router.use(authenticate);
 
